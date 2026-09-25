@@ -1,5 +1,6 @@
 package fr.nathan.api.dto;
 
+// This class is used to represent the response of a company information request.
 public class CompanyResponseDTO {
 
     private Long siren;
@@ -9,7 +10,6 @@ public class CompanyResponseDTO {
     private String lastName;
     private String companyName;
     private String activityCode;
-
 
     public CompanyResponseDTO(
             Long siren,

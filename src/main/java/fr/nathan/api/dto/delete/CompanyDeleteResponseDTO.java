@@ -1,5 +1,6 @@
 package fr.nathan.api.dto.delete;
 
+// This class is used to represent the response of a company deletion request.
 public class CompanyDeleteResponseDTO {
     
     private Long siren;

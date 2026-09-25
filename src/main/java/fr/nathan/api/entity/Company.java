@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import jakarta.persistence.*;
 
+// This class is used to represent a company entity in the database.
 @Entity 
 @Table(name = "mytable")
 public class Company {

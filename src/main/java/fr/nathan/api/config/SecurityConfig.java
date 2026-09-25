@@ -17,6 +17,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+// This class is used to configure the security settings for the application.
 @Configuration
 public class SecurityConfig {
 
@@ -31,6 +32,7 @@ public class SecurityConfig {
                 "HmacSHA256"
         );
     }
+
 
     @Bean
     public JwtEncoder jwtEncoder(SecretKey secretKey) {
@@ -67,7 +69,12 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/api/health",
-                    "/v1/api/auth/**"
+                    "/v1/api/auth/**",
+
+                    // Swagger
+                    "/swagger-ui.html",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**"
                 ).permitAll()
 
                 .anyRequest().authenticated()

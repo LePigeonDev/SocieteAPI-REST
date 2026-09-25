@@ -1,5 +1,6 @@
 package fr.nathan.api.dto.Patch;
 
+// This class is used to represent the request for patching a company's information.
 public class CompanyPatchRequestDTO {
 
     private String firstName;

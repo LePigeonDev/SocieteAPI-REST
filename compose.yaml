@@ -30,6 +30,7 @@ services:
 
 
   api:
+    image: api-societe:1.0
     build:
       context: .
       dockerfile: Dockerfile
@@ -48,7 +49,8 @@ services:
 
       APP_CLIENT_ID: ${APP_CLIENT_ID}
       APP_CLIENT_SECRET: ${APP_CLIENT_SECRET}
-      
+      JWT_SECRET: ${JWT_SECRET}
+
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_OPEN_IN_VIEW: "false"
       SPRING_JPA_SHOW_SQL: "true"

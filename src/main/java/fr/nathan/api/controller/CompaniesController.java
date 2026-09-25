@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+// This class is used to handle company-related requests.
 @RestController
 @RequestMapping("/v1/api/company")
 public class CompaniesController {
@@ -24,6 +25,8 @@ public class CompaniesController {
         this.companyService = companyService;
     }
 
+
+    // This method is used to get a company's information by its SIREN number.
     @GetMapping("/{siren}")
     public ResponseEntity<CompanyResponseDTO> getCompanyBySiren (
         @PathVariable Long siren
@@ -33,6 +36,8 @@ public class CompaniesController {
         return ResponseEntity.ok(response);
     }
 
+
+    // This method is used to get a company's information by its name.
     @GetMapping("/search/{name}")
     public ResponseEntity<CompanyResponseDTO> getCompanyByName (
         @PathVariable String name
@@ -42,6 +47,8 @@ public class CompaniesController {
         return ResponseEntity.ok(response);
     }
 
+
+    // This method is used to update a company's information by its SIREN number.
     @PatchMapping("/{siren}")
     public ResponseEntity<CompanyResponseDTO> patchCompany(
             @PathVariable Long siren,
@@ -54,6 +61,8 @@ public class CompaniesController {
         return ResponseEntity.ok(response);
     }
 
+
+    // This method is used to delete a company by its SIREN number.
     @DeleteMapping("/{siren}")
     public ResponseEntity<CompanyDeleteResponseDTO> deleteCompany(
             @PathVariable Long siren

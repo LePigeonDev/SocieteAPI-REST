@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+// This class is used to handle business logic related to companies.
 @Service
 public class CompanyService {
 
@@ -19,6 +20,7 @@ public class CompanyService {
         this.companyRepository = companyRepository;
     }
 
+    // This method is used to get a company's information by its SIREN number.
     public CompanyResponseDTO getCompanyBySiren(Long siren) {
         Company company = companyOK(siren);
 
@@ -33,6 +35,7 @@ public class CompanyService {
         );
     }
 
+    // This method is used to get a company's information by its name.
     public CompanyResponseDTO getCompanyByName(String name) {
         Company company = companyRepository.findByCompanyName(name)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -51,6 +54,7 @@ public class CompanyService {
         );
     }
 
+    // This method is used to delete a company by its SIREN number.
     public CompanyDeleteResponseDTO deleteCompany(Long siren) {
         Company company = companyOK(siren);
 
@@ -62,6 +66,7 @@ public class CompanyService {
         );
     }
 
+    // This method is used to patch a company's information by its SIREN number.
     public CompanyResponseDTO patchCompany(
             Long siren,
             CompanyPatchRequestDTO request
@@ -98,6 +103,7 @@ public class CompanyService {
         );
     }
 
+    // This method is used to check if a company exists by its SIREN number.
     private Company companyOK(Long siren) {
         return companyRepository.findById(siren)
                 .orElseThrow(() -> new ResponseStatusException(

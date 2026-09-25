@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
+// This class is used to handle authentication requests.
 @RestController
 @RequestMapping("/v1/api/auth")
 public class AuthController {
@@ -18,6 +19,7 @@ public class AuthController {
         this.jwtService = jwtService;
     }
 
+    // This method is used to authenticate a user and return a JWT token.
     @PostMapping("/token")
     public ResponseEntity<AuthResponseDTO> getToken(
             @RequestBody AuthRequestDTO request

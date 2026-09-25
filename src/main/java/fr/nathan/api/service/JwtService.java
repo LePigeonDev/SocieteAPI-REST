@@ -15,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 import fr.nathan.api.dto.auth.AuthRequestDTO;
 import fr.nathan.api.dto.auth.AuthResponseDTO;
 
+// This class is used to handle JWT authentication and token generation.
 @Service
 public class JwtService {
 
