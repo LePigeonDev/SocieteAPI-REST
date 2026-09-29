@@ -3,6 +3,7 @@ package fr.nathan.api.service;
 import fr.nathan.api.entity.Company;
 import fr.nathan.api.repository.CompanyRepository;
 import fr.nathan.api.dto.CompanyResponseDTO;
+import fr.nathan.api.dto.CompaniesResponseDTO;
 import fr.nathan.api.dto.Patch.CompanyPatchRequestDTO;
 import fr.nathan.api.dto.delete.CompanyDeleteResponseDTO;
 
@@ -10,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.List;
 // This class is used to handle business logic related to companies.
 @Service
 public class CompanyService {
@@ -52,6 +55,37 @@ public class CompanyService {
                 company.getCompanyName(),
                 company.getActivityCode()
         );
+    }
+
+    public CompaniesResponseDTO getCompanyByActivityCode(String activityCode) {
+
+        List<Company> companyList = companyRepository.findByActivityCode(activityCode);
+
+        if (companyList.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Company not found"
+            );
+        }
+
+        List<CompanyResponseDTO> companies = new ArrayList<>();
+
+        for (Company company : companyList) {
+
+            CompanyResponseDTO CompanyDto = new CompanyResponseDTO(
+                    company.getSiren(),
+                    company.getFirstName(),
+                    company.getEmployeeRange(),
+                    company.getStatus(),
+                    company.getLastName(),
+                    company.getCompanyName(),
+                    company.getActivityCode()
+            );
+
+            companies.add(CompanyDto);
+        }
+
+        return new CompaniesResponseDTO(companies);
     }
 
     // This method is used to delete a company by its SIREN number.
