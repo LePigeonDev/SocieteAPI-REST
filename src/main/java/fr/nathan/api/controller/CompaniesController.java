@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 // This class is used to handle company-related requests.
 @RestController
-@RequestMapping("/v1/api/company")
+@RequestMapping("v1/companies")
 public class CompaniesController {
 
     private final CompanyService companyService;
@@ -30,17 +30,18 @@ public class CompaniesController {
 
     // This method is used to get a company's information by its SIREN number.
     @GetMapping("/{siren}")
-    public ResponseEntity<CompanyResponseDTO> getCompanyBySiren (
-        @PathVariable Long siren
+    public ResponseEntity<CompanyResponseDTO> getCompanyBySiren(
+            @PathVariable Long siren
     ) {
-        CompanyResponseDTO response = 
+        CompanyResponseDTO response =
                 companyService.getCompanyBySiren(siren);
+
         return ResponseEntity.ok(response);
     }
 
 
     // This method is used to get a company's information by its name.
-    @GetMapping(value = "/search", params = {"name", "!code"})
+    @GetMapping(params = "name")
     public ResponseEntity<CompanyResponseDTO> getCompanyByName(
         @RequestParam String name
     ) {
@@ -49,8 +50,10 @@ public class CompaniesController {
 
         return ResponseEntity.ok(response);
     }
+
+    
     // This method is used to get a company's information by its activityCode.
-    @GetMapping(value = "/search", params = {"code", "!name"})
+    @GetMapping(params = "code")
     public ResponseEntity<CompaniesResponseDTO> getCompanyByActivityCode(
         @RequestParam String code
     ) {

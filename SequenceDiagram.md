@@ -8,7 +8,7 @@ database "Base de données\nSIRENE locale" as DB
  
 == Retrouver une société par son identifiant ==
  
-Client -> API : GET /v1/api/company/{siren}
+Client -> API : GET /v1/company/{siren}
 API -> Service : getCompanyBySiren(siren)
 Service -> DB : SELECT entreprise\nWHERE siren = ?
 DB --> Service : Entreprise trouvée / aucune
@@ -23,7 +23,7 @@ end
  
 == Chercher des entreprises par code activité ==
  
-Client -> API : GET /v1/api/company/search?code=?
+Client -> API : GET /v1/company?code=...
 API -> Service : getCompanyByName(code)
 Service -> DB : SELECT entreprises\nWHERE codeActivite = ?
 DB --> Service : getCompanyByActivityCode(activityCode)
@@ -37,7 +37,7 @@ end
  
 == Chercher une entreprise par dénomination ==
  
-Client -> API : GET /v1/api/company/search?name=?
+Client -> API : GET /v1/company?name=...
 API -> Service : getCompanyByName(name)
 Service -> DB : SELECT entreprises\nWHERE denomination = ?
 DB --> Service : 
@@ -51,7 +51,7 @@ end
  
 == Modifier une entreprise ==
  
-Client -> API : PATCH /v1/api/company/{siren}\nDonnées JSON à modifier
+Client -> API : PATCH /v1/company/{siren}\nDonnées JSON à modifier
 API -> Service : patchCompany(siren, request)
 Service -> DB : Vérifier existence
  

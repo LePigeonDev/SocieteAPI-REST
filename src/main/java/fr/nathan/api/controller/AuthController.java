@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 // This class is used to handle authentication requests.
 @RestController
-@RequestMapping("/v1/api/auth")
+@RequestMapping("v1/auth")
 public class AuthController {
 
     private final JwtService jwtService;

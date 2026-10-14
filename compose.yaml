@@ -1,3 +1,4 @@
+
 services:
 
   mysql:
@@ -28,7 +29,6 @@ services:
       retries: 20
       start_period: 10s
 
-
   api:
     image: api-societe:1.1
     build:
@@ -57,6 +57,32 @@ services:
 
     ports:
       - "127.0.0.1:8080:8080"
+
+  
+  analytics:
+    image: analytics-societe:1.0
+    build:
+      context: ./analytics
+      dockerfile: Dockerfile
+
+    container_name: analytics-societe
+    restart: unless-stopped
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: "3306"
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+      PYTHONUNBUFFERED: "1"
+
+    ports:
+      - "127.0.0.1:8000:8000"
 
 
 volumes:
