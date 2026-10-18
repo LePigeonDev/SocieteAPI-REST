@@ -3,3 +3,4 @@ gunicorn
 pandas
 SQLAlchemy
 PyMySQL
+flask-smorest

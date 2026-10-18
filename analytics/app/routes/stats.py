@@ -1,6 +1,7 @@
 
 from flask import Blueprint, jsonify
 from sqlalchemy.exc import SQLAlchemyError
+from flask_smorest import Blueprint
 
 from app.services.analytics import (
     get_activity_statistics,
@@ -11,7 +12,7 @@ from app.services.analytics import (
 stats_bp = Blueprint("statistics", __name__)
 
 
-@stats_bp.get("/activity")
+@stats_bp.route("/activity", methods=["GET"])
 def activity_statistics():
     try:
         results = get_activity_statistics()
@@ -25,7 +26,7 @@ def activity_statistics():
         return jsonify({"error": "Database unavailable"}), 503
 
 
-@stats_bp.get("/activity/by-year")
+@stats_bp.route("/activity/by-year", methods=["GET"])
 def activity_statistics_by_year():
     try:
         results = get_activity_statistics_by_year()
