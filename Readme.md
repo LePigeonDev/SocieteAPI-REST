@@ -1,26 +1,29 @@
 # API Société
 
-API REST développée en **Java avec Spring Boot**.
+API REST développée en **Java avec Spring Boot**, permettant de consulter, modifier et supprimer les données d'entreprises enregistrées dans une base MySQL.
 
-Le projet met en place une architecture backend permettant de gérer une API sécurisée avec authentification JWT et persistance des données dans une base MySQL.
+L'accès aux données est sécurisé avec OAuth2 et des JWT signés asymétriquement par Keycloak.
 
 ## Technologies utilisées
 
-* Java 21
-* Spring Boot
-* Spring Web
-* Spring Security
-* Spring Data JPA
-* OAuth2 Resource Server
-* JWT
-* MySQL
-* Maven
-* Springdoc OpenAPI / Swagger
-* Docker / Docker Compose
+- Java 21
+- Spring Boot
+- Spring Web
+- Spring Security
+- Spring Data JPA / Hibernate
+- OAuth2 Resource Server
+- Keycloak
+- JWT / RS256
+- MySQL
+- PostgreSQL
+- Python
+- Maven
+- Springdoc OpenAPI / Swagger
+- Docker / Docker Compose
 
 ## Architecture
 
-Le projet suit une architecture classique Spring Boot :
+Le projet suit une architecture en couches :
 
 ```text
 src/main/java/fr/nathan/api/
@@ -33,149 +36,121 @@ src/main/java/fr/nathan/api/
 └── ApiApplication.java
 ```
 
-### `controller`
-
-Contient les contrôleurs REST.
-
-Ils reçoivent les requêtes HTTP et appellent les services nécessaires.
-
-Exemple :
-
-```text
-POST /v1/api/auth/...
-GET  /api/health
-```
-
-### `service`
-
-Contient la logique métier de l'application.
-
-Cette couche permet notamment de séparer le fonctionnement interne de l'application des contrôleurs HTTP.
-
-Elle contient également la gestion des JWT.
-
-### `repository`
-
-Contient les interfaces Spring Data JPA permettant de communiquer avec la base de données.
-
-```text
-Controller
-    ↓
-Service
-    ↓
-Repository
-    ↓
-MySQL
-```
-
-### `entity`
-
-Contient les entités JPA représentant les données enregistrées dans MySQL.
-
-### `dto`
-
-Contient les DTO (*Data Transfer Objects*).
-
-Ils permettent de définir précisément les données reçues et envoyées par l'API sans exposer directement les entités de la base de données.
-
-### `config`
-
-Contient la configuration de l'application, notamment la sécurité.
-
-La classe `SecurityConfig` configure :
-
-* Spring Security ;
-* l'authentification JWT ;
-* la signature des JWT en `HS256` ;
-* les routes publiques ;
-* les routes nécessitant une authentification.
+| Répertoire | Responsabilité |
+|---|---|
+| `config` | Configuration et sécurité de l'application |
+| `controller` | Gestion des requêtes HTTP |
+| `dto` | Objets de transfert de données |
+| `entity` | Entités JPA |
+| `repository` | Accès à la base de données |
+| `service` | Logique métier |
 
 ## Authentification
 
-L'API utilise des **JSON Web Tokens (JWT)**.
-
-Le fonctionnement général est :
+L'authentification est déléguée à Keycloak via OAuth2, en utilisant le flux **Client Credentials**.
 
 ```text
-Utilisateur
-    │
-    │ Identifiants
-    ▼
-API d'authentification
-    │
-    │ JWT
-    ▼
-Utilisateur
-    │
-    │ Authorization: Bearer <token>
-    ▼
-Routes protégées
+Client
+   │
+   │ Client ID + Client Secret
+   ▼
+Keycloak
+   │
+   │ JWT signé en RS256
+   ▼
+Client
+   │
+   │ Authorization: Bearer <JWT>
+   ▼
+API REST
+   │
+   │ Validation du JWT
+   ▼
+MySQL
 ```
 
-La clé utilisée pour signer les JWT est fournie avec la variable d'environnement :
+Keycloak signe les JWT avec une clé privée RSA. L'API vérifie leur signature à l'aide de la clé publique récupérée auprès de Keycloak.
 
-```text
-JWT_SECRET
+### Configuration Keycloak
+
+| Paramètre | Valeur |
+|---|---|
+| Realm | `societe` |
+| Client ID | `societe-api` |
+| Flux OAuth2 | Client Credentials |
+| Algorithme de signature | RS256 |
+| Audience | `societe-api` |
+| Durée de validité du JWT | 5 minutes |
+| Issuer local | `http://localhost:8081/realms/societe` |
+
+### Obtention d'un JWT
+
+```bash
+TOKEN=$(curl -fsS -X POST \
+  http://localhost:8081/realms/societe/protocol/openid-connect/token \
+  -u societe-api \
+  -d "grant_type=client_credentials" \
+  | jq -r '.access_token')
 ```
 
-L'issuer utilisé par l'application est :
+Le secret du client est demandé lors de l'exécution.
 
-```text
-societe.api
+### Utilisation du JWT
+
+```bash
+curl -i \
+  -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/v1/companies/1807254
 ```
 
 ## Sécurité
 
-Certaines routes sont accessibles sans authentification, notamment :
+Spring Security vérifie :
+
+- La signature du JWT ;
+- L'émetteur ;
+- L'audience ;
+- La validité temporelle du jeton.
+
+Les routes suivantes sont publiques :
 
 ```text
-/api/health
-/v1/api/auth/**
+/health
+/swagger-ui.html
 /swagger-ui/**
 /v3/api-docs/**
 ```
 
 Les autres routes nécessitent un JWT valide.
 
-Les requêtes utilisent l'en-tête HTTP :
+### Tests réalisés
 
-```http
-Authorization: Bearer <JWT>
-```
+| Test | Résultat |
+|---|---|
+| Génération d'un JWT RS256 | Réussite |
+| Requête sans JWT | HTTP 401 |
+| Requête avec un JWT malformé | HTTP 401 |
+| Requête avec un JWT expiré | HTTP 401 |
+| Accès aux données avec un JWT valide | HTTP 200 |
 
 ## Base de données
 
-L'application utilise **MySQL** avec Spring Data JPA et Hibernate.
+Deux bases de données sont utilisées :
 
-La connexion est configurée à l'aide des variables :
+- **MySQL** : stockage des données des entreprises.
+- **PostgreSQL** : stockage des données et de la configuration Keycloak.
 
-```text
-SPRING_DATASOURCE_URL
-SPRING_DATASOURCE_USERNAME
-SPRING_DATASOURCE_PASSWORD
-```
+Les données sont conservées dans des volumes Docker persistants.
 
-Hibernate est utilisé pour faire le lien entre les objets Java et les données présentes dans MySQL.
+Sur une nouvelle installation, les données métier doivent être importées dans MySQL.
 
 ## Documentation de l'API
 
-La documentation OpenAPI est générée automatiquement avec Springdoc.
-
-Swagger UI est disponible sur :
-
-```text
-http://127.0.0.1:8080/swagger-ui.html
-```
-
-La spécification OpenAPI JSON est disponible sur :
-
-```text
-http://127.0.0.1:8080/v3/api-docs
-```
+- Swagger UI : http://localhost:8080/swagger-ui.html
+- OpenAPI JSON : http://localhost:8080/v3/api-docs
+- Console Keycloak : http://localhost:8081/admin
 
 ## Compilation
-
-Le projet utilise le Maven Wrapper.
 
 Sous Linux :
 
@@ -189,7 +164,7 @@ Sous Windows :
 .\mvnw.cmd clean package
 ```
 
-Pour compiler sans lancer les tests :
+Sans exécuter les tests :
 
 ```bash
 ./mvnw clean package -DskipTests
@@ -197,29 +172,59 @@ Pour compiler sans lancer les tests :
 
 ## Docker
 
-L'application et MySQL peuvent également être lancés avec Docker Compose :
+### Configuration
+
+Copier le fichier `.env.example` :
+
+```bash
+cp .env.example .env
+```
+
+Renseigner les variables d'environnement dans le fichier `.env`.
+
+Ce fichier contient les informations sensibles et ne doit pas être versionné dans Git.
+
+### Démarrage
 
 ```bash
 docker compose up -d --build
 ```
 
-Les deux services utilisés sont :
+Les services utilisés sont :
+
+| Conteneur | Fonction |
+|---|---|
+| `api-societe` | API REST Java |
+| `mysql-societe` | Base de données métier |
+| `keycloak-societe` | Serveur d'authentification OAuth2 |
+| `keycloak-db-societe` | Base PostgreSQL de Keycloak |
+| `analytics-societe` | Service d'analyse Python |
+
+Le realm Keycloak est configuré pour être automatiquement importé lors d'une nouvelle installation depuis :
 
 ```text
-api-societe
-mysql-societe
+keycloak/realms/societe-realm.json
 ```
+
+### Arrêt
+
+```bash
+docker compose down
+```
+
+Les conteneurs ne démarrent pas automatiquement au démarrage de la machine.
+
+## Déploiement réseau
+
+La configuration actuelle est destinée au développement local.
+
+Pour un déploiement sur le réseau St-Michel, les adresses d'accès doivent être adaptées et les communications sécurisées avec HTTPS.
 
 ## Objectif du projet
 
-Ce projet permet de mettre en pratique plusieurs concepts importants du développement backend Java :
-
-* création d'une API REST ;
-* architecture en couches ;
-* utilisation de DTO ;
-* accès aux données avec JPA ;
-* authentification JWT ;
-* sécurisation des routes avec Spring Security ;
-* documentation avec Swagger/OpenAPI ;
-* utilisation de MySQL ;
-* conteneurisation avec Docker.
+- Développer une API REST Java.
+- Utiliser une architecture en couches.
+- Accéder aux données avec JPA et MySQL.
+- Sécuriser une API REST avec OAuth2 et Keycloak.
+- Utiliser des JWT signés asymétriquement en RS256.
+- Conteneuriser et déployer les services avec Docker Compose.
